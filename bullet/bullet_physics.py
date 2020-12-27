@@ -1517,3 +1517,35 @@ class BulletPhysics(physics.Physics):
                                             camera_pitch,
                                             camera_target_position,
                                             self.uid)
+
+    #
+    # Save state management
+    #
+
+    def save_state(self, save_full_state=True):
+        """
+
+        Return:
+          state_id (int): id for saved state
+          save_full_state (bool, optional): Save the full state or not
+        """
+        if save_full_state:
+            state_id = pybullet.saveState(self.uid)
+        else:
+            state_id = pybullet.saveWorld(self.uid)
+
+    def restore_state_from_id(self, state_id):
+        """
+        
+        Args:
+           state_id (int): saved state id to restore
+        """
+        pybullet.restore(stateId=state_id, clientServerId=self.uid)
+
+    def remove_state(self, state_id):
+        """
+        
+        Args:
+           state_id (int): saved state id to remove
+        """
+        pybullet.removeState(state_id, self.uid)
