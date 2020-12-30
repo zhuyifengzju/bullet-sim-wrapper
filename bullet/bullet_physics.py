@@ -9,6 +9,7 @@ import time
 
 import numpy as np
 import pybullet
+import pybullet_data
 import six
 
 from bullet.math_utils import Orientation
@@ -22,7 +23,6 @@ JOINT_TYPES_MAPPING = {
     'fixed': pybullet.JOINT_FIXED,
     'point2point': pybullet.JOINT_POINT2POINT
 }
-
 
 class BulletPhysics():
     """Physics API wrapper for Bullet."""
@@ -41,7 +41,6 @@ class BulletPhysics():
             worker_id: The key of the simulation client.
         """
         logger.info('pybullet API Version: %s.' % (pybullet.getAPIVersion()))
-
         if use_visualizer:
             self._uid = pybullet.connect(pybullet.GUI)
             pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_SHADOWS, 1)
@@ -52,6 +51,7 @@ class BulletPhysics():
             logger.info('Use worker_id %d for the simulation.', worker_id)
             self._uid = pybullet.connect(pybullet.DIRECT, key=worker_id)
             logger.info('Connected client %d to DIRECT.', self._uid)
+        pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
 
         self._time_step = time_step
         self._start_time = None
