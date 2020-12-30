@@ -11,10 +11,9 @@ import numpy as np
 import pybullet
 import six
 
-from robovat.math import Orientation
-from robovat.math import Pose
-from robovat.simulation.physics import physics
-from robovat.utils.logging import logger
+from bullet.math_utils import Orientation
+from bullet.math_utils import Pose
+from bullet.logging import logger
 
 
 JOINT_TYPES_MAPPING = {
@@ -25,7 +24,7 @@ JOINT_TYPES_MAPPING = {
 }
 
 
-class BulletPhysics(physics.Physics):
+class BulletPhysics():
     """Physics API wrapper for Bullet."""
 
     def __init__(self,
@@ -952,7 +951,7 @@ class BulletPhysics(physics.Physics):
         _, _, _, _, _, _, _, _, _, quaternion, _, _, _, _, _ = (
             pybullet.getConstraintInfo(
                 constraintUniqueId=constraint_uid, physicsClientId=self.uid))
-        return Orientation(quaternion)
+        return quaternion
 
     def get_constraint_max_force(self, constraint_uid):
         """Get the maximal force of the constraint.
