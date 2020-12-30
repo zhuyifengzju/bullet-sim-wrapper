@@ -27,6 +27,9 @@ class Quaternion(np.ndarray):
     def __str__(self):
         return '[%g, %g, %g, %g]' % (self.x, self.y, self.z, self.w)
 
+    def to_wxyz(self):
+        return np.array([self[3], self[0], self[1], self[2]])
+    
     @property
     def euler(self):
         return Euler(euler_from_quaternion(self))

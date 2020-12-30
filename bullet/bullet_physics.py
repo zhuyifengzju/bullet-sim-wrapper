@@ -1548,3 +1548,12 @@ class BulletPhysics():
            state_id (int): saved state id to remove
         """
         pybullet.removeState(state_id, self.uid)
+
+    # Other functions
+    def get_visual_shape_data(self, object_id):
+        return pybullet.getVisualShapeData(object_id, self.uid)
+
+
+    @property
+    def geom_mesh(self):
+        return pybullet.GEOM_MESH
