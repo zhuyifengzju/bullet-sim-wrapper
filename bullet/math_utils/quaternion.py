@@ -28,16 +28,24 @@ class Quaternion(np.ndarray):
         return '[%g, %g, %g, %g]' % (self.x, self.y, self.z, self.w)
 
     def to_wxyz(self):
-        return np.array([self[3], self[0], self[1], self[2]])
+        return self.quaternion_wxyz
+
+    def to_xyzw(self):
+        return self.quaternion_xyzw
+    
     
     @property
     def euler(self):
         return Euler(euler_from_quaternion(self))
 
     @property
-    def quaternion(self):
-        self
+    def quaternion_xyzw(self):
+        return self
 
+    @property
+    def quaternion_wxyz(self):
+        return np.array([self[3], self[0], self[1], self[2]])        
+        
     @property
     def matrix3(self):
         return matrix3_from_quaternion(self)

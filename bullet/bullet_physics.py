@@ -528,6 +528,21 @@ class BulletPhysics():
             physicsClientId=self.uid)
         return Pose([position, quaternion])
 
+    def get_link_local_offset(self, link_uid):
+        """Get the local offset of the link.
+
+        Args:
+            link_uid: A tuple of the body Unique ID and the link index.
+
+        Returns:
+            An instance of Pose.
+        """
+        body_uid, link_ind = link_uid
+        _, _, position, quaternion, _, _ = pybullet.getLinkState(
+            bodyUniqueId=body_uid, linkIndex=link_ind,
+            physicsClientId=self.uid)
+        return Pose([position, quaternion])
+    
     def get_link_center_of_mass(self, link_uid):
         """Get the center of mass of the link.
 

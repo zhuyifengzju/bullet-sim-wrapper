@@ -1,5 +1,6 @@
 from bullet import BulletPhysics, Body
 from bullet.math_utils import Pose
+import os
 
 try:
     import visii as v
@@ -19,17 +20,17 @@ class BulletWorld():
         self._physics.step()
 
     def add_body(self, file_name, pose=Pose(), scale=1.0):
-        body_uid = self._physics.add_body(file_name, pose=pose, scale=scale)
+        body_uid = self._physics.add_body(self._assets_dir + file_name, pose=pose, scale=scale)
         return body_uid
         
     def default_initialization(self):
-        self.add_body(self._assets_dir + 'envs/planes/plane.urdf')
-        self.add_body(self._assets_dir + 'envs/tables/table.urdf')
-        self.robot_uid = self.add_body(self._assets_dir + 'robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.6], [0., 0., 0., 1.]]))
+        self.add_body('envs/planes/plane.urdf')
+        self.table_uid = self.add_body('envs/tables/table.urdf')
+        self.robot_uid = self.add_body('robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]]))
+        self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
         # self.add_body(self._assets_dir + 'ycb/004_sugar_box/google_16k/textured.obj', scale=0.01)
 
     # def save(self):
-    
 
 class ViSIIBulletWorld(BulletWorld):
     def __init__(self):
@@ -75,7 +76,7 @@ class ViSIIBulletWorld(BulletWorld):
     def update_camera(self,
                       at_vec=(0, 0, 0.5),
                       up_vec=(0, 0, 1),
-                      eye_vec=(2.0, 1.5, 1.0)):
+                      eye_vec=(3.0, 0.0, 1.5)):
         self.visii_camera.get_transform().look_at(
             at=at_vec,
             up=up_vec,
@@ -84,12 +85,14 @@ class ViSIIBulletWorld(BulletWorld):
     def render(self,
                width=800,
                height=800,
-               spp=400):
+               spp=800):
+        self.update_visii(self.table_uid)
         self.update_visii(self.robot_uid)
+        self.update_visii(self.laikago_uid)
         v.render(width=width, height=height, samples_per_pixel=spp)
 
     def update_visii(self, object_id):
-        for visual in self._physics.get_visual_shape_data(object_id):
+        for (i, visual) in enumerate(self._physics.get_visual_shape_data(object_id)):
             # Extract visual data from pybullet
             objectUniqueId = visual[0]
             linkIndex = visual[1]
@@ -100,40 +103,53 @@ class ViSIIBulletWorld(BulletWorld):
             localVisualFrameOrientation = visual[6]
             rgbaColor = visual[7]
 
-            position = localVisualFramePosition
-            orientation = localVisualFrameOrientation
+            # position = localVisualFramePosition
+            # orientation = localVisualFrameOrientation
+            # orientation = (orientation[3], orientation[0], orientation[1], orientation[2])
 
             additional_pos = None
             additional_rot = None
             if linkIndex != -1:
-                linkState = self._physics.get_link_center_of_mass((objectUniqueId, linkIndex))
-                additional_pos = position
-                additional_rot = orientation            
+                linkState = self._physics.get_link_pose((objectUniqueId, linkIndex))
                 position = linkState[0]
-                orientation = linkState[1].quaternion.to_wxyz()
+                orientation = linkState[1].quaternion.to_xyzw()
 
+                linkOffsetState = self._physics.get_link_local_offset((objectUniqueId, linkIndex))
+                additional_pos = linkOffsetState[0]
+                additional_rot = linkOffsetState[1].quaternion.to_xyzw()     
+                
+            else:
+                linkState = self._physics.get_body_pose(objectUniqueId)
+                additional_pos = localVisualFramePosition
+                additional_rot = localVisualFrameOrientation
+                # additional_rot = (additional_rot[3], additional_rot[0], additional_rot[1], additional_rot[2])
+                position = linkState[0]
+                orientation = linkState[1].quaternion.to_xyzw()
+                
             # Name to use for visii components
-            object_name = str(objectUniqueId) + "_" + str(linkIndex)
-
+            object_name = str(objectUniqueId) + "_" + str(i)
             print(object_name)
             if object_name not in self.visii_objects:
                 # Create mesh component if not yet made
                 if visualGeometryType == self._physics.geom_mesh:
                     meshAssetFileName = meshAssetFileName.decode('UTF-8')
+                    
                     self.visii_objects[object_name] = v.import_scene(
                         meshAssetFileName
                     )
-                    print(meshAssetFileName)
-                    print(self.visii_objects[object_name].transforms)
             if visualGeometryType != 5: continue
 
+            self.visii_objects[object_name].transforms[0].set_scale(dimensions)
             self.visii_objects[object_name].transforms[0].set_position(position)
-            if additional_pos:
+            if additional_pos is not None and linkIndex == -1:
                 self.visii_objects[object_name].transforms[0].add_position(additional_pos)
 
             self.visii_objects[object_name].transforms[0].set_rotation(orientation)
-            if additional_rot:
+            if additional_rot is not None:
                 self.visii_objects[object_name].transforms[0].add_rotation(additional_rot)
 
-            # todo... add support for spheres, cylinders, etc
-            # print(visualGeometryType
+            
+            print(meshAssetFileName)
+            print(position, additional_pos)
+            print(orientation, additional_rot)
+
