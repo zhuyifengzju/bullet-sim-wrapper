@@ -1,6 +1,7 @@
-from bullet import BulletPhysics, Body
-from bullet.math_utils import Pose
+from bullet_world import BulletPhysics, Body
+from bullet_world.math_utils import Pose
 import os
+import abc
 
 try:
     import visii as v
@@ -9,12 +10,23 @@ except:
     USE_VISII = False
 
 class BulletWorld():
-    def __init__(self, assets_dir="assets/"):
-        self._physics = BulletPhysics()
+    def __init__(self,
+                 assets_dir=os.path.join(os.path.dirname(__file__), "assets/"),
+                 default_init=False,
+                 time_step=1e-3,
+                 use_visualizer=True,
+                 worker_id=0
+                 ):
+        self._physics = BulletPhysics(time_step=time_step,
+                                      use_visualizer=use_visualizer,
+                                      worker_id=worker_id)
         self._physics.start()
         self._assets_dir = assets_dir
-        
-        self.default_initialization()
+
+        if default_init:
+            self.default_initialization()
+        else:
+            self.custom_initialization()
 
     def step_simulation(self):
         self._physics.step()
@@ -30,12 +42,16 @@ class BulletWorld():
         self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
         # self.add_body(self._assets_dir + 'ycb/004_sugar_box/google_16k/textured.obj', scale=0.01)
 
+    @abc.abstractmethod
+    def custom_initialization(self):
+        raise NotImplementedError
+
     # def save(self):
 
 class ViSIIBulletWorld(BulletWorld):
-    def __init__(self):
-        super().__init__()
-        v.initialize(window_on_top=True)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        v.initialize()
         v.enable_denoiser()
 
         self.visii_camera = v.entity.create(

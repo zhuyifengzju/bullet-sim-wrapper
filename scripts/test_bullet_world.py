@@ -1,5 +1,5 @@
 import _init_paths
-from bullet import BulletWorld, ViSIIBulletWorld
+from bullet_world import BulletWorld, ViSIIBulletWorld
 
 
 # bulletworld = BulletWorld()

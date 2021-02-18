@@ -9,10 +9,10 @@ from copy import deepcopy
 
 import numpy as np
 
-from bullet.transformations import euler_from_matrix3
-from bullet.transformations import quaternion_from_matrix3
-from bullet.math_utils.euler import Euler
-from bullet.math_utils.quaternion import Quaternion
+from bullet_world.transformations import euler_from_matrix3
+from bullet_world.transformations import quaternion_from_matrix3
+from bullet_world.math_utils.euler import Euler
+from bullet_world.math_utils.quaternion import Quaternion
 
 
 class Orientation(object):

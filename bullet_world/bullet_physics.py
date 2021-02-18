@@ -12,9 +12,9 @@ import pybullet
 import pybullet_data
 import six
 
-from bullet.math_utils import Orientation
-from bullet.math_utils import Pose
-from bullet.logging import logger
+from bullet_world.math_utils import Orientation
+from bullet_world.math_utils import Pose
+from bullet_world.logging import logger
 
 
 JOINT_TYPES_MAPPING = {

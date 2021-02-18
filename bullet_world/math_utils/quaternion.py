@@ -7,9 +7,9 @@ from __future__ import print_function
 
 import numpy as np
 
-from bullet.transformations import euler_from_quaternion
-from bullet.transformations import matrix3_from_quaternion
-from bullet.math_utils.euler import Euler
+from bullet_world.transformations import euler_from_quaternion
+from bullet_world.transformations import matrix3_from_quaternion
+from bullet_world.math_utils.euler import Euler
 
 class Quaternion(np.ndarray):
     """Quaternion.

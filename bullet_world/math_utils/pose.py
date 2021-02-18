@@ -9,8 +9,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from bullet.math_utils.point import Point
-from bullet.math_utils.orientation import Orientation
+from bullet_world.math_utils.point import Point
+from bullet_world.math_utils.orientation import Orientation
 
 
 class Pose(object):
