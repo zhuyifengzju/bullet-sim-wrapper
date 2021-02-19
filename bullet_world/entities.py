@@ -53,7 +53,6 @@ class Body():
     def mass(self):
         return self.client(self.uid)['mass']
 
-    
 
 class Joint():
     """Joint.

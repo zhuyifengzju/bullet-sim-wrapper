@@ -31,17 +31,18 @@ class BulletWorld():
     def step_simulation(self):
         self._physics.step()
 
-    def add_body(self, file_name, pose=Pose(), scale=1.0):
-        body_uid = self._physics.add_body(self._assets_dir + file_name, pose=pose, scale=scale)
+    def add_body(self, file_name, pose=Pose(), scale=1.0, is_static=False):
+        body_uid = self._physics.add_body(self._assets_dir + file_name, pose=pose, scale=scale, is_static=is_static)
         return body_uid
         
     def default_initialization(self):
         self.add_body('envs/planes/plane.urdf')
         self.table_uid = self.add_body('envs/tables/table.urdf')
-        self.robot_uid = self.add_body('robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]]))
+        self.robot_uid = self.add_body('robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]]), is_static=True)
         self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
         # self.add_body(self._assets_dir + 'ycb/004_sugar_box/google_16k/textured.obj', scale=0.01)
 
+        
     @abc.abstractmethod
     def custom_initialization(self):
         raise NotImplementedError
@@ -107,6 +108,19 @@ class ViSIIBulletWorld(BulletWorld):
         self.update_visii(self.laikago_uid)
         v.render(width=width, height=height, samples_per_pixel=spp)
 
+    def get_image(self,
+                  width=800,
+                  height=800):
+        return v.render_data(width=width,
+                             height=height,
+                             start_frame=0,
+                             frame_count=1,
+                             bounce=0,
+                             options='none')
+        # 1. save to a tmp image file
+
+        # 2. read as np array and return
+
     def update_visii(self, object_id):
         for (i, visual) in enumerate(self._physics.get_visual_shape_data(object_id)):
             # Extract visual data from pybullet
@@ -169,3 +183,5 @@ class ViSIIBulletWorld(BulletWorld):
             print(position, additional_pos)
             print(orientation, additional_rot)
 
+    def __del__(self):
+        v.deinitialize()

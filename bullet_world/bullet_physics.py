@@ -490,6 +490,9 @@ class BulletPhysics():
 
         pybullet.changeVisualShape(**kwargs)
 
+    def get_num_joints(self, body_uid):
+        return pybullet.getNumJoints(bodyUniqueId=body_uid,
+                                     physicsClientId=self.uid)
     #
     # Link
     #
@@ -1361,9 +1364,25 @@ class BulletPhysics():
         kwargs['bodyUniqueId'] = body_uid
         kwargs['joint_positions'] = joint_positions
         kwargs['joint_velocities'] = joint_accelerations
-        joint_forces = pybullet.calculateInverseDynamics()
+        kwargs['physicsClientId'] = self.uid
+        joint_forces = pybullet.calculateInverseDynamics(**kwargs)
         return joint_forces
 
+    def calculate_mass_matrix(self, body_uid, joint_positions):
+        return pybullet.calculateMassMatrix(bodyUniqueId=body_uid,
+                                            objPositions=joint_positions,
+                                            physicsClientId=self.uid)
+
+    def calculate_jacobian(self, link_uid, joint_positions, joint_velocities, joint_accelerations):
+        body_uid, link_ind = link_uid
+        return pybullet.caculateJacobian(bodyUniqueId=body_uid,
+                                         linkIndex=link_ind,
+                                         localPosition=[0., 0., 0.]
+                                         objPositions=joint_positions,
+                                         objVelocities=joint_velocities,
+                                         objAccelerations=joint_accelerations,
+                                         physicsClientId=self.uid)
+    
     #
     # Contacts
     # Pybullet function getContactPoints return:
@@ -1572,3 +1591,8 @@ class BulletPhysics():
     @property
     def geom_mesh(self):
         return pybullet.GEOM_MESH
+
+    #
+    # Camera Image
+    #
+    
