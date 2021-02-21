@@ -4,22 +4,38 @@ import os
 import abc
 
 try:
-    import visii as v
+    import nvisii as v
     USE_VISII = True
 except:
     USE_VISII = False
 
 class BulletWorld():
+    """
+    Args:
+
+       debug_camera_config (dict): 
+
+    """
     def __init__(self,
                  assets_dir=os.path.join(os.path.dirname(__file__), "assets/"),
                  default_init=False,
                  time_step=1e-3,
                  use_visualizer=True,
-                 worker_id=0
+                 worker_id=0,
+                 debug_camera_config=None
                  ):
         self._physics = BulletPhysics(time_step=time_step,
                                       use_visualizer=use_visualizer,
                                       worker_id=worker_id)
+
+        if debug_camera_config is None:
+            debug_camera_config = {}
+            debug_camera_config["camera_distance"] = 1.5
+            debug_camera_config["camera_yaw"] = 0.
+            debug_camera_config["camera_pitch"] = -30
+            debug_camera_config["camera_target_position"] = [0.0, 0.0, 0.7]
+        self._physics.reset_debug_visualizer(**debug_camera_config)
+
         self._physics.start()
         self._assets_dir = assets_dir
 
@@ -31,8 +47,12 @@ class BulletWorld():
     def step_simulation(self):
         self._physics.step()
 
-    def add_body(self, file_name, pose=Pose(), scale=1.0, is_static=False):
-        body_uid = self._physics.add_body(self._assets_dir + file_name, pose=pose, scale=scale, is_static=is_static)
+    def add_body(self, file_name, pose=Pose(), scale=1.0, is_static=False, assets_dir=None):
+        if assets_dir is None:
+            body_file_name = self._assets_dir + file_name
+        else:
+            body_file_name = assets_dir + file_name
+        body_uid = self._physics.add_body(body_file_name, pose=pose, scale=scale, is_static=is_static)
         return body_uid
         
     def default_initialization(self):
@@ -42,6 +62,10 @@ class BulletWorld():
         self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
         # self.add_body(self._assets_dir + 'ycb/004_sugar_box/google_16k/textured.obj', scale=0.01)
 
+    @property
+    def physics(self):
+        return self._physics
+        
         
     @abc.abstractmethod
     def custom_initialization(self):
@@ -52,7 +76,7 @@ class BulletWorld():
 class ViSIIBulletWorld(BulletWorld):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        v.initialize()
+        v.initialize(headless=True, verbose=True)
         v.enable_denoiser()
 
         self.visii_camera = v.entity.create(
@@ -106,7 +130,7 @@ class ViSIIBulletWorld(BulletWorld):
         self.update_visii(self.table_uid)
         self.update_visii(self.robot_uid)
         self.update_visii(self.laikago_uid)
-        v.render(width=width, height=height, samples_per_pixel=spp)
+        return v.render(width=width, height=height, samples_per_pixel=spp)
 
     def get_image(self,
                   width=800,
@@ -114,7 +138,7 @@ class ViSIIBulletWorld(BulletWorld):
         return v.render_data(width=width,
                              height=height,
                              start_frame=0,
-                             frame_count=1,
+                             frame_count=500,
                              bounce=0,
                              options='none')
         # 1. save to a tmp image file

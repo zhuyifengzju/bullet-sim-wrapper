@@ -59,6 +59,8 @@ class BulletPhysics():
 
         self._gravity = None
 
+        self._use_visualizer = use_visualizer
+
     #
     # Properties
     #
@@ -1377,7 +1379,7 @@ class BulletPhysics():
         body_uid, link_ind = link_uid
         return pybullet.caculateJacobian(bodyUniqueId=body_uid,
                                          linkIndex=link_ind,
-                                         localPosition=[0., 0., 0.]
+                                         localPosition=[0., 0., 0.],
                                          objPositions=joint_positions,
                                          objVelocities=joint_velocities,
                                          objAccelerations=joint_accelerations,
@@ -1595,4 +1597,51 @@ class BulletPhysics():
     #
     # Camera Image
     #
+
+    def compute_view_matrix(self, camera_eye_position, camera_target_position, camera_up_vector):
+        """
+
+        Return:
+          view_matrix (np.array): 4x4 matrix
+        """
+        view_matrix = pybullet.computeViewMatrix(cameraEyePosition=camera_eye_position,
+                                                 cameraTargetPosition=camera_target_position,
+                                                 cameraUpVector=camera_up_vector,
+                                                 physicsClientId=self.uid)
+        view_matrix = np.array(view_matrix).reshape(4, 4)
+        return view_matrix
+
+    def compute_view_matrix(self, camera_target_position, distance, yaw, pitch, roll, up_axis_index):
+        raise NotImplementedError
+
+    def compute_projection_matrix_fov(self, fov, aspect, near_val, far_val):
+        projection_matrix = pybullet.computeProjectionMatrixFOV(fov=fov,
+                                                                aspect=aspect,
+                                                                nearVal=near_val,
+                                                                farVal=far_val,
+                                                                physicsClientId=self.uid)
+        projection_matrix = np.array(projection_matrix).reshape(4, 4)
+        return projection_matrix
     
+    def get_camera_image(self, width, height, mode="rgb", view_matrix=None, projection_matrix=None):
+        kwargs = {"width": width,
+                  "height": height,
+                  "physicsClientId": self.uid}
+
+        if view_matrix is not None:
+            kwargs["viewMatrix"] = view_matrix
+        if projection_matrix is not None:
+            kwargs["projectionMatrix"] = projection_matrix
+
+        if not self._use_visualizer:
+            kwargs["renderer"] = pybullet.ER_TINY_RENDERER
+            
+        _, _, rgb_pixels, depth_pixels, seg_mask = pybullet.getCameraImage(**kwargs)
+        if mode == "rgb":
+            return rgb_pixels
+        elif mode == "depth":
+            return depth_pixels
+        elif mode == 'rgbd':
+            return np.concatenate((rgb_pixels, depth_pixels), axis=-1)
+        else:
+            raise NotImplementedError
