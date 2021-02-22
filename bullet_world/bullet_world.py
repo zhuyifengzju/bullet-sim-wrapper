@@ -1,5 +1,8 @@
 from bullet_world import BulletPhysics, Body
 from bullet_world.math_utils import Pose
+from bullet_world.interfaces import JointInterface, LinkInterface, DynamicsParams
+from bullet_world.robot_arm import RobotArm
+from easydict import EasyDict
 import os
 import abc
 
@@ -27,6 +30,14 @@ class BulletWorld():
         self._physics = BulletPhysics(time_step=time_step,
                                       use_visualizer=use_visualizer,
                                       worker_id=worker_id)
+
+        self.interfaces = EasyDict()
+        joint_interface = JointInterface(self)
+        link_interface = LinkInterface(self)
+        dynamics_params = DynamicsParams(self, joint_interface, link_interface)
+        self.interfaces.joints = joint_interface
+        self.interfaces.links = link_interface
+        self.interfaces.dynamics = dynamics_params
 
         if debug_camera_config is None:
             debug_camera_config = {}
@@ -58,8 +69,20 @@ class BulletWorld():
     def default_initialization(self):
         self.add_body('envs/planes/plane.urdf')
         self.table_uid = self.add_body('envs/tables/table.urdf')
-        self.robot_uid = self.add_body('robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]]), is_static=True)
-        self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
+
+        self.robot_arms = []
+        self.robot_arms.append(RobotArm(config_file=os.path.join(os.path.dirname(__file__), "configs/default_franka_panda.yaml"),
+                                        bworld=self,
+                                        interfaces=self.interfaces))
+
+        self.robot_uids = []
+        for arm in self.robot_arms:
+            self.robot_uids.append(arm.uid)
+        
+        # self.robot_uid = self.add_body('robots/panda/panda.urdf', pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]]), is_static=True)
+        
+        # self.laikago_uid = self.add_body('robots/laikago/laikago_toes.urdf', pose=Pose([[0.0, 0.5, 1.0], [0., 0., 1., 0.]]))
+
         # self.add_body(self._assets_dir + 'ycb/004_sugar_box/google_16k/textured.obj', scale=0.01)
 
     @property
@@ -76,7 +99,7 @@ class BulletWorld():
 class ViSIIBulletWorld(BulletWorld):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        v.initialize(headless=True, verbose=True)
+        v.initialize(verbose=True)
         v.enable_denoiser()
 
         self.visii_camera = v.entity.create(
@@ -128,8 +151,8 @@ class ViSIIBulletWorld(BulletWorld):
                height=800,
                spp=800):
         self.update_visii(self.table_uid)
-        self.update_visii(self.robot_uid)
-        self.update_visii(self.laikago_uid)
+        for robot_uid in self.robot_uids:
+            self.update_visii(robot_uid)
         return v.render(width=width, height=height, samples_per_pixel=spp)
 
     def get_image(self,

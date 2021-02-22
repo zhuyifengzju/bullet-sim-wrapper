@@ -1375,11 +1375,12 @@ class BulletPhysics():
                                             objPositions=joint_positions,
                                             physicsClientId=self.uid)
 
-    def calculate_jacobian(self, link_uid, joint_positions, joint_velocities, joint_accelerations):
+    def calculate_jacobian(self, link_uid, com_positions, joint_positions, joint_velocities, joint_accelerations):
         body_uid, link_ind = link_uid
-        return pybullet.caculateJacobian(bodyUniqueId=body_uid,
+        import pdb; pdb.set_trace()
+        return pybullet.calculateJacobian(bodyUniqueId=body_uid,
                                          linkIndex=link_ind,
-                                         localPosition=[0., 0., 0.],
+                                         localPosition=com_positions,
                                          objPositions=joint_positions,
                                          objVelocities=joint_velocities,
                                          objAccelerations=joint_accelerations,
