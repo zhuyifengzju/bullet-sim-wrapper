@@ -24,7 +24,7 @@ class JointInterface(BaseInterface):
 
     def get_velocity(self, joint_uid):
         return self.physics.get_joint_velocity(joint_uid)
-
+    
     def set_velocity(self, joint_uid, velocity):
         self.physics.set_joint_velocity(velocity)
 
@@ -33,6 +33,10 @@ class JointInterface(BaseInterface):
 
     def get_num_joints(self, body_uid):
         return self.physics.get_num_joints(body_uid)
+
+    def position_control(self, joint_uid, target_position, **kwargs):
+        self.physics.position_control(joint_uid, target_position, **kwargs)
+    
     # def set_torque(self, joint_uid, torque):
     #     self.physics.set_joint_torque(joint_uid, torque)
 
@@ -53,6 +57,14 @@ class LinkInterface(BaseInterface):
     def com(self, link_uid):
         return self.physics.get_link_center_of_mass(link_uid)
 
+    def ik_joints(self,
+                  link_uid,
+                  link_pose,
+                  **kwargs):
+        return self.physics.compute_inverse_kinematics(link_uid=link_uid,
+                                                       link_pose=link_pose,
+                                                       **kwargs)
+    
 class DynamicsParams():
     def __init__(self, bworld, joint_interface, link_interface):
         self.physics = bworld.physics

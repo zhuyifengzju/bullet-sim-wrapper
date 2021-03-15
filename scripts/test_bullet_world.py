@@ -4,7 +4,7 @@ import cv2
 
 bulletworld = BulletWorld(default_init=True)
 
-print(bulletworld.robot_arms[0].mass_matrix)
+
 # print(bulletworld.robot_arms[0].zero_decoupled_jacobian)
 
 # for _ in range(1000):

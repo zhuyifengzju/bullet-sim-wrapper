@@ -14,6 +14,7 @@ class RobotArm():
 
         # interfaces
         self.interfaces = interfaces
+        self.phyiscs = bworld.physics
         
         # Specify ee link name
         self.ee_link_name = self.config.EE_NAME
@@ -44,6 +45,10 @@ class RobotArm():
                 self._arm_joint_mapping[name] = joint
                 self._arm_joints.append(joint)
 
+        neutral_positions = [0., 0.458, 0.31, -2.24, -0.30, 2.66, 2.32]
+        for (i, joint_uid) in enumerate(self.arm_joints):
+            self.interfaces.joints.set_position(joint_uid, neutral_positions[i])
+                
         self.ee_link = None
         for link in self._links:
             name = bworld.physics.get_link_name(link)
@@ -52,6 +57,30 @@ class RobotArm():
                 break
         assert(self.ee_link is not None, "link name not found")
 
+        self.position_control_param = {"position_gain": None,
+                                       "velocity_gain": None}
+    # def motion_plan(self, plan_seq, type="pose"):
+
+    def compute_ik_joints(self, pose):
+        target_joints = self.interfaces.links.ik_joints(self.ee_link, pose)
+        return target_joints
+
+    def set_position_control_param(self,
+                                   position_gain,
+                                   velocity_gain):
+        self.position_control_param["position_gain"] = position_gain
+        self.position_control_param["velocity_gain"] = velocity_gain
+    
+    def set_position_control_target(self, target_positions, arm_only=True):
+        if arm_only:
+            positions = []
+            for (i, joint_uid) in enumerate(self.arm_joints):
+                self.interfaces.joints.position_control(joint_uid, target_positions[i], **self.position_control_param)
+                positions.append(target_positions[i])
+        else:
+            raise NotImplementedError
+
+    
     @property
     def arm_joints(self):
         return self._arm_joints
@@ -59,6 +88,10 @@ class RobotArm():
     @property
     def joints(self):
         return self._joints
+    
+    @property
+    def joint_positions(self):
+        return self.interfaces.joints.get_positions(self.joints)
 
     @property
     def zero_decoupled_jacobian(self):
