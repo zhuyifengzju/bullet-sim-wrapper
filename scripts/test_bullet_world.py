@@ -2,7 +2,7 @@ import _init_paths
 from bullet_world import BulletWorld, ViSIIBulletWorld
 import cv2
 
-bulletworld = BulletWorld(default_init=True)
+# bulletworld = BulletWorld(default_init=True)
 
 
 # print(bulletworld.robot_arms[0].zero_decoupled_jacobian)
@@ -16,8 +16,8 @@ bulletworld = BulletWorld(default_init=True)
 # bulletworld.step_simulation()
 # input()
 
-# visii_bulletworld = ViSIIBulletWorld(default_init=True)
-# visii_bulletworld.render()
+visii_bulletworld = ViSIIBulletWorld(default_init=True)
+visii_bulletworld.render()
 
 
 input()
