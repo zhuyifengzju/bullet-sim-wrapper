@@ -11,9 +11,9 @@ lines = [x for x in lines if '.png' not in x]
 long_description = ''.join(lines)
 
 setup(
-    name="bullet_sim_wrapper",
+        name="bullet_world",
     packages=[
-        package for package in find_packages() if package.startswith("bullet_sim_wrapper")
+        package for package in find_packages() if package.startswith("bullet_world")
     ],
     install_requires=[
     ],
