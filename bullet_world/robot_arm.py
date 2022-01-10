@@ -47,8 +47,9 @@ class RobotArm():
 
         neutral_positions = [0., 0.458, 0.31, -2.24, -0.30, 2.66, 2.32]
         for (i, joint_uid) in enumerate(self.arm_joints):
+            print(i)
             self.interfaces.joints.set_position(joint_uid, neutral_positions[i])
-                
+
         self.ee_link = None
         for link in self._links:
             name = bworld.physics.get_link_name(link)

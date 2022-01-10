@@ -65,6 +65,10 @@ class BulletWorld():
             body_file_name = assets_dir + file_name
         body_uid = self._physics.add_body(body_file_name, pose=pose, scale=scale, is_static=is_static)
         return body_uid
+
+    def add_primitive_body(self, **kwargs):
+        body_uid = self._physics.add_primitive_body(**kwargs)
+        return body_uid
         
     def default_initialization(self):
         self.add_body('envs/planes/plane.urdf')

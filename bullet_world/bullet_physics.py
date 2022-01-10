@@ -226,6 +226,19 @@ class BulletPhysics():
 
         return int(body_uid)
 
+    def create_collision_shape(*args, **kwargs):
+        kwargs["physicsClientId"] = self.uid
+        return pybullet.createCollisionShape(*args, **kwargs)
+
+    def create_visual_shape(*args, **kwargs):
+        kwargs["physicsClientId"] = self.uid
+        return pybullet.createVisualShape(*args, **kwargs)
+
+    def add_primitive_body(self, **kwargs):
+        kwargs["physicsClientId"] = self.uid
+        body_uid = pybullet.createMultiBody(**kwargs)
+        return int(body_uid)
+
     def remove_body(self, body_uid):
         """Remove the body.
 
