@@ -1,0 +1,45 @@
+ARM:
+  JOINT_NAMES: [
+  # 'base_footprint_joint',
+#   'base_bellow_joint',
+#   'base_laser_joint',
+#   'fl_caster_rotation_joint',
+#   'fl_caster_l_wheel_joint',
+#   'fl_caster_r_wheel_joint',
+#   'fr_caster_rotation_joint',
+#   'bl_caster_rotation_joint',
+#   'bl_caster_l_wheel_joint',
+#   'bl_caster_r_wheel_joint',  
+#   'torso_lift_joint',
+#   'l_torso_lift_side_plate_joint',
+#   'r_torso_lift_side_plate_joint',
+# 'torso_lift_motor_screw_joint',
+# 'torso_lift_screw_torso_lift_joint',
+# 'torso_lift_joint',
+# 'imu_joint',
+# 'head_pan_joint',
+# 'head_tilt_joint',
+# 'head_plate_frame_joint',
+# 'sensor_mount_frame_joint'
+# 'high_def_frame_joint',
+# 'high_def_optical_frame_joint',
+# 'double_stereo_frame_joint',
+
+  ]
+
+GRIPPER:
+  L_FINGER_NAME: "r_gripper_l_finger_joint"
+  R_FINGER_NAME: "r_gripper_l_finger_joint"
+  L_FINGER_TIP_NAME: "r_gripper_l_finger_tip_link"
+  R_FINGER_TIP_NAME: "r_gripper_r_finger_tip_link"
+
+EE_NAME: "r_gripper_palm_link"
+
+
+NEUTRAL_JOINT_POSITIONS: []
+
+
+URDF_NAME: "robots/pr2/pr2.urdf"
+ASSETS_DIR: "default"
+
+

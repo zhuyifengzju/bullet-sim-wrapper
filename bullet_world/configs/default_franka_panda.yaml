@@ -30,4 +30,3 @@ NEUTRAL_JOINT_POSITIONS: [
 
 URDF_NAME: "robots/panda/panda.urdf"
 ASSETS_DIR: "default"
-

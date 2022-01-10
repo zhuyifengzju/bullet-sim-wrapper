@@ -64,7 +64,13 @@ class BulletPhysics():
     #
     # Properties
     #
+    def joint_type(self, joint_type_name):
+        return JOINT_TYPES_MAPPING[joint_type_name]
 
+    @property
+    def geom_box(self):
+        return pybullet.GEOM_BOX
+    
     @property
     def uid(self):
         return self._uid
@@ -226,11 +232,11 @@ class BulletPhysics():
 
         return int(body_uid)
 
-    def create_collision_shape(*args, **kwargs):
+    def create_collision_shape(self, *args, **kwargs):
         kwargs["physicsClientId"] = self.uid
         return pybullet.createCollisionShape(*args, **kwargs)
 
-    def create_visual_shape(*args, **kwargs):
+    def create_visual_shape(self, *args, **kwargs):
         kwargs["physicsClientId"] = self.uid
         return pybullet.createVisualShape(*args, **kwargs)
 

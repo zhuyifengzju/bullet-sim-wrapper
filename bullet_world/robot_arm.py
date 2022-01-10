@@ -45,7 +45,7 @@ class RobotArm():
                 self._arm_joint_mapping[name] = joint
                 self._arm_joints.append(joint)
 
-        neutral_positions = [0., 0.458, 0.31, -2.24, -0.30, 2.66, 2.32]
+        neutral_positions = self.init_joint_positions
         for (i, joint_uid) in enumerate(self.arm_joints):
             print(i)
             self.interfaces.joints.set_position(joint_uid, neutral_positions[i])
