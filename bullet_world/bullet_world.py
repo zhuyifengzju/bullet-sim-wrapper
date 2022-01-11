@@ -55,6 +55,9 @@ class BulletWorld():
         else:
             self.custom_initialization()
 
+    def update_camera(self, *args, **kwargs):
+        self._physics.reset_debug_visualizer(*args, **kwargs)
+
     def step_simulation(self):
         self._physics.step()
 
@@ -103,14 +106,14 @@ class BulletWorld():
 class ViSIIBulletWorld(BulletWorld):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        v.initialize(verbose=True)
+        v.initialize(headless=True, verbose=False)
         v.enable_denoiser()
 
         self.visii_camera = v.entity.create(
             name="camera",
             transform=v.transform.create("camera"),
             camera=v.camera.create("camera"))
-        self.update_camera()
+        self.update_visii_camera()
         v.set_camera_entity(self.visii_camera)
         v.set_dome_light_intensity(0)
         v.disable_dome_light_sampling()
@@ -141,7 +144,7 @@ class ViSIIBulletWorld(BulletWorld):
 
         self.visii_objects = {}
 
-    def update_camera(self,
+    def update_visii_camera(self,
                       at_vec=(0, 0, 0.5),
                       up_vec=(0, 0, 1),
                       eye_vec=(3.0, 0.0, 1.5)):
@@ -150,15 +153,29 @@ class ViSIIBulletWorld(BulletWorld):
             up=up_vec,
             eye=eye_vec)
 
-    def render(self,
+    def visii_render(self,
                width=800,
                height=800,
                spp=800):
-        self.update_visii(self.table_uid)
         for robot_uid in self.robot_uids:
             self.update_visii(robot_uid)
         return v.render(width=width, height=height, samples_per_pixel=spp)
 
+    def visii_render_to_file(self,
+                             width=800,
+                             height=800,
+                             spp=100,
+                             file_name="./example.png"):
+        for robot_uid in self.robot_uids:
+            self.update_visii(robot_uid)        
+        v.render_to_file(
+            width=width,
+            height=height,
+            samples_per_pixel=spp,
+            file_path=file_name,
+        )        
+                             
+    
     def get_image(self,
                   width=800,
                   height=800):
@@ -172,7 +189,8 @@ class ViSIIBulletWorld(BulletWorld):
 
         # 2. read as np array and return
 
-    def update_visii(self, object_id):
+    def update_visii(self, object_id, name_string=""):
+        print("Debugging: ", self._physics.get_visual_shape_data(object_id))
         for (i, visual) in enumerate(self._physics.get_visual_shape_data(object_id)):
             # Extract visual data from pybullet
             objectUniqueId = visual[0]
@@ -208,7 +226,7 @@ class ViSIIBulletWorld(BulletWorld):
                 orientation = linkState[1].quaternion.to_xyzw()
                 
             # Name to use for visii components
-            object_name = str(objectUniqueId) + "_" + str(i)
+            object_name = name_string + str(objectUniqueId) + "_" + str(i)
             print(object_name)
             if object_name not in self.visii_objects:
                 # Create mesh component if not yet made
@@ -218,6 +236,35 @@ class ViSIIBulletWorld(BulletWorld):
                     self.visii_objects[object_name] = v.import_scene(
                         meshAssetFileName
                     )
+                else:
+                    if visualGeometryType == self._physics.geom_box:
+                        self.visii_objects[object_name] = v.entity.create(
+                            name=object_name,
+                            mesh = v.mesh.create_box(object_name),
+                            transform = v.transform.create(object_name),
+                            material = v.material.create(object_name)
+                        )
+                        self.visii_objects[object_name].get_transform().set_scale((dimensions[0] / 2,
+                                                                                   dimensions[1] / 2,
+                                                                                   dimensions[2] / 2))
+                    elif visualGeometryType == self._physics.geom_cylinder:
+                        self.visii_objects[object_name] = v.entity.create(
+                            name=object_name,
+                            mesh = v.mesh.create_cylinder(object_name, radius=dimensions[1] / 2, size=dimensions[0] / 2),
+                            transform = v.transform.create(object_name),
+                            material = v.material.create(object_name)
+                        )
+                        
+                    self.visii_objects[object_name].get_transform().set_position(position)
+                    if additional_pos is not None and linkIndex == -1:
+                        self.visii_objects[object_name].get_transform().add_position(additional_pos)
+                    self.visii_objects[object_name].get_transform().set_rotation(orientation)
+                    if additional_rot is not None:
+                        self.visii_objects[object_name].get_transform().add_rotation(additional_rot)
+                        
+                    self.visii_objects[object_name].get_material().set_base_color(rgbaColor[:3])
+                    self.visii_objects[object_name].get_material().set_roughness(0.7)
+                    
             if visualGeometryType != 5: continue
 
             self.visii_objects[object_name].transforms[0].set_scale(dimensions)
@@ -230,9 +277,9 @@ class ViSIIBulletWorld(BulletWorld):
                 self.visii_objects[object_name].transforms[0].add_rotation(additional_rot)
 
             
-            print(meshAssetFileName)
-            print(position, additional_pos)
-            print(orientation, additional_rot)
+            # print(meshAssetFileName)
+            # print(position, additional_pos)
+            # print(orientation, additional_rot)
 
     def __del__(self):
         v.deinitialize()

@@ -9,7 +9,7 @@ class RobotArm():
        interfaces: EasyDict, containing all interface objects
 
     """
-    def __init__(self, config_file, bworld, interfaces, init_pose=Pose([[0.0, 0.0, 0.5], [0., 0., 0., 1.]])):
+    def __init__(self, config_file, bworld, interfaces, init_pose=[[0.0, 0.0, 0.5], [0., 0., 0., 1.]]):
         self.config = YamlConfig(config_file).as_easydict()
 
         # interfaces
@@ -23,6 +23,8 @@ class RobotArm():
 
         self.urdf_name = self.config.URDF_NAME
         self.assets_dir = None
+
+        init_pose = Pose(init_pose)
         
         if self.config.ASSETS_DIR != "default":
             self.assets_dir = self.config.ASSETS_DIR

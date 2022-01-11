@@ -70,6 +70,10 @@ class BulletPhysics():
     @property
     def geom_box(self):
         return pybullet.GEOM_BOX
+
+    @property
+    def geom_cylinder(self):
+        return pybullet.GEOM_CYLINDER
     
     @property
     def uid(self):
