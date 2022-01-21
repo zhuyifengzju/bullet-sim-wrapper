@@ -39,7 +39,7 @@ EE_NAME: "r_gripper_palm_link"
 NEUTRAL_JOINT_POSITIONS: []
 
 
-URDF_NAME: "robots/pr2/pr2.urdf"
+URDF_NAME: "robots/drake/pr2_description/urdf/pr2_simplified.urdf"
 ASSETS_DIR: "default"
 
 
