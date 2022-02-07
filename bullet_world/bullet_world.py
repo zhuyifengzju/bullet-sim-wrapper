@@ -104,45 +104,48 @@ class BulletWorld():
     # def save(self):
 
 class ViSIIBulletWorld(BulletWorld):
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 use_visii=True,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
-        v.initialize(headless=True, verbose=False)
-        v.enable_denoiser()
+        if use_visii:
+            v.initialize(headless=True, verbose=False)
+            v.enable_denoiser()
 
-        self.visii_camera = v.entity.create(
-            name="camera",
-            transform=v.transform.create("camera"),
-            camera=v.camera.create("camera"))
-        self.update_visii_camera()
-        v.set_camera_entity(self.visii_camera)
-        v.set_dome_light_intensity(0)
-        v.disable_dome_light_sampling()
+            self.visii_camera = v.entity.create(
+                name="camera",
+                transform=v.transform.create("camera"),
+                camera=v.camera.create("camera"))
+            self.update_visii_camera()
+            v.set_camera_entity(self.visii_camera)
+            v.set_dome_light_intensity(0)
+            v.disable_dome_light_sampling()
 
-        # Light
-        self.light_0 = v.entity.create(
-            name="light_0",
-            mesh=v.mesh.create_plane("light_0", flip_z=True),
-            transform=v.transform.create("light_1"),
-            light=v.light.create("light_1")
-        )
+            # Light
+            self.light_0 = v.entity.create(
+                name="light_0",
+                mesh=v.mesh.create_plane("light_0", flip_z=True),
+                transform=v.transform.create("light_1"),
+                light=v.light.create("light_1")
+            )
 
-        self.light_0.get_light().set_intensity(100)
-        self.light_0.get_transform().set_scale((1, 1, 1))
-        self.light_0.get_transform().set_position((3, 0, 6))
-        self.light_0.get_transform().look_at(
-            at=(0, 0, 0),
-            up=(0, 0, 1))
+            self.light_0.get_light().set_intensity(100)
+            self.light_0.get_transform().set_scale((1, 1, 1))
+            self.light_0.get_transform().set_position((3, 0, 6))
+            self.light_0.get_transform().look_at(
+                at=(0, 0, 0),
+                up=(0, 0, 1))
 
-        # Floor
-        self.floor = v.entity.create(
-            name="floor",
-            mesh=v.mesh.create_plane("floor"),
-            transform=v.transform.create("floor"),
-            material=v.material.create("floor"))
-        self.floor.get_transform().set_position((0, 0, 0))
-        self.floor.get_transform().set_scale((10, 10, 10))
+            # Floor
+            self.floor = v.entity.create(
+                name="floor",
+                mesh=v.mesh.create_plane("floor"),
+                transform=v.transform.create("floor"),
+                material=v.material.create("floor"))
+            self.floor.get_transform().set_position((0, 0, 0))
+            self.floor.get_transform().set_scale((10, 10, 10))
 
-        self.visii_objects = {}
+            self.visii_objects = {}
 
     def update_visii_camera(self,
                       at_vec=(0, 0, 0.5),
