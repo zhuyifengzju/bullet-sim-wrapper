@@ -13,6 +13,12 @@ class JointInterface(BaseInterface):
     def get_position(self, joint_uid):
         return self.physics.get_joint_position(joint_uid)
 
+    def get_names(self, joint_uids):
+        joint_names = []
+        for joint_uid in joint_uids:
+            joint_names.append(self.name(joint_uid))
+        return joint_names        
+
     def get_positions(self, joint_uids):
         joint_positions = []
         for joint_uid in joint_uids:

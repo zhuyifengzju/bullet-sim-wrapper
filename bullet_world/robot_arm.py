@@ -97,6 +97,10 @@ class RobotArm():
         return self.interfaces.joints.get_positions(self.joints)
 
     @property
+    def joint_names(self):
+        return self.interfaces.joints.get_names(self.joints)
+    
+    @property
     def zero_decoupled_jacobian(self):
         return self.interfaces.dynamics.zero_jacobian(self.joints, self.ee_link, decoupled=True)
 
